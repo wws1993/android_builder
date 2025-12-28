@@ -157,11 +157,13 @@ async function runBuild() {
 
     // D. 下载并回收 APK
     consola.start("📥 正在回收 APK 文件...");
-    const artRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs/${runId}/artifacts`, { headers: HEADERS });
+    const artUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs/${runId}/artifacts`
+    consola.log(artUrl)
+    const artRes = await fetch(artUrl, { headers: HEADERS });
     const artData = await artRes.json();
     const artifact = artData.artifacts.find((a: any) => a.name === CONFIG.artifactName);
 
-    if (!artifact) throw new Error("未找到生成的 Artifact。");
+    if (!artifact) throw new Error("未找到生成的 Artifact。", artifact, );
 
     const downloadUrl = artifact.archive_download_url;
     const downloadRes = await fetch(downloadUrl, { headers: HEADERS });
