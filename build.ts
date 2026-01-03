@@ -47,6 +47,20 @@ async function processProject() {
     const xml = fs.readFileSync(configPath, "utf-8");
     const result = await parseStringPromise(xml);
 
+    const appId = process.env.APP_ID;
+    if (!appId) {
+      consola.error("错误：.env 中未配置 APP_ID");
+      process.exit(1);
+    }
+    // --- 强制同步 AppID ---
+    const currentId = result.widget.$.id;
+    if (currentId !== appId) {
+      consola.warn(`AppID 不匹配：正在将 "${currentId}" 修改为 "${appId}"`);
+      result.widget.$.id = appId;
+    } else {
+      consola.success(`AppID 校验一致: ${appId}`);
+    }
+
     // 递归查找所有的 icon 标签
     const findIcons = (obj: any): string[] => {
       let icons: string[] = [];
