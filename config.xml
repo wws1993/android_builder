@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.wws1993.kegel" version="1.0.0" xmlns="http://www.w3.org/ns/widgets">
+<widget id="com.moretime2023.kaigeer" version="1.0.0" xmlns="http://www.w3.org/ns/widgets">
   <name>凯格尔运动</name>
   <description>专业凯格尔练习追踪</description>
   <content src="index.html"/>
