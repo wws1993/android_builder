@@ -1,5 +1,5 @@
 {
-  "version": "1.0.15",
+  "version": "1.0.244",
   "dependencies": {
     "@types/xml2js": "^0.4.14",
     "consola": "^3.4.2",
@@ -11,5 +11,5 @@
     "@types/node": "^25.0.3",
     "@types/unzipper": "^0.10.11"
   },
-  "lastModify": "2026-01-03 09:51:02"
+  "lastModify": "2026-01-03 21:57:15"
 }

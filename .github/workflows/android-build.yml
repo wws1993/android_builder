@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main, master ] # 当你提交代码到 main 或 master 分支时触发
+    branches: [ main, master ]
 
 jobs:
   build:
@@ -29,15 +29,34 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Prepare Cordova Android Platform
-        run: |
-          cordova platform add android
-
       - name: Build Android APK
-        run: cordova build android --debug
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"[release]"* ]]; then
+            echo "模式: Release (生产环境)"
+            cordova platform add android
+            cordova build android --release --device
+          else
+            echo "模式: Debug (测试环境)"
+            cordova platform add android
+            cordova build android --debug
+          fi
 
-      - name: Upload APK
+      - name: Sign APK (Only for Release)
+        if: contains(github.event.head_commit.message, '[release]')
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: platforms/android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: my-app-apk
-          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            platforms/android/app/build/outputs/apk/debug/app-debug.apk
+            platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+            ${{ steps.sign_app.outputs.signedReleaseFile }}
