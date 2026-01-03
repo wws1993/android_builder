@@ -44,6 +44,10 @@ jobs:
             cordova build android --debug --verbose
           fi
 
+      # 增加一个检查步骤，看看文件到底打到哪里去了
+      - name: List Build Files
+        run: find platforms/android -name "*.apk" -o -name "*.aab"
+
       # 关键修改 2：增加一个“调试步骤”，如果路径不存在，打印目录结构帮你查错
       - name: Check Build Output
         if: always()

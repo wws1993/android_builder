@@ -6,6 +6,7 @@
   <plugin name="cordova-plugin-statusbar" spec="^3.0.0"/>
   <plugin name="cordova-plugin-vibration" spec="^3.1.1"/>
   <plugin name="cordova-plugin-splashscreen" spec="^6.0.0"/>
+  <engine name="android" spec="^12.0.0"/>
   <platform name="android">
     <icon src="www/assets/icon.png"/>
     <preference name="Fullscreen" value="false"/>
