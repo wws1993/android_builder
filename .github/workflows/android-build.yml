@@ -23,13 +23,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # ================= 新增步骤：强制安装 Gradle 8.7 =================
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.7
-      # =============================================================
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
@@ -40,10 +33,13 @@ jobs:
         run: cordova platform add android --no-interactive
 
       - name: Build Android APK
+        # 核心修改：通过环境变量直接告诉 Cordova 使用哪个版本的 Gradle
+        # 这样就不需要 setup-gradle 插件，避开了 GitHub 缓存服务的报错
+        env:
+          CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL: https://services.gradle.org/distributions/gradle-8.7-all.zip
         run: |
           if [[ "${{ github.event.head_commit.message }}" == *"[release]"* ]]; then
             echo "模式: Release (生产环境)"
-            # 显式指定使用 gradle 编译
             cordova build android --release --verbose -- --apk
           else
             echo "模式: Debug (测试环境)"
