@@ -29,23 +29,35 @@ jobs:
       - name: Install Cordova
         run: npm install -g cordova
 
+      # 关键修改 1：确保先添加平台，再进行条件编译
+      - name: Prepare Platform
+        run: cordova platform add android --no-interactive
+
       - name: Build Android APK
         run: |
           if [[ "${{ github.event.head_commit.message }}" == *"[release]"* ]]; then
             echo "模式: Release (生产环境)"
-            cordova platform add android
-            cordova build android --release --device
+            # 增加 --verbose 方便查错
+            cordova build android --release --device --verbose
           else
             echo "模式: Debug (测试环境)"
-            cordova platform add android
-            cordova build android --debug
+            cordova build android --debug --verbose
           fi
 
+      # 关键修改 2：增加一个“调试步骤”，如果路径不存在，打印目录结构帮你查错
+      - name: Check Build Output
+        if: always()
+        run: |
+          echo "检查生成的目录结构："
+          ls -R platforms/android/app/build/outputs || echo "目录不存在"
+
       - name: Sign APK (Only for Release)
-        if: contains(github.event.head_commit.message, '[release]')
+        # 只有在 release 且上一步成功时运行
+        if: success() && contains(github.event.head_commit.message, '[release]')
         uses: r0adkll/sign-android-release@v1
         id: sign_app
         with:
+          # 关键修改 3：有些版本可能在 /outputs/apk/release，有些在 /outputs/apk/release/
           releaseDirectory: platforms/android/app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
           alias: ${{ secrets.KEY_ALIAS }}
@@ -53,10 +65,12 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: my-app-apk
+          # 关键修改 4：使用通配符匹配所有生成的 APK
           path: |
-            platforms/android/app/build/outputs/apk/debug/app-debug.apk
-            platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+            platforms/android/app/build/outputs/apk/**/*.apk
             ${{ steps.sign_app.outputs.signedReleaseFile }}
+          if-no-files-found: warn
