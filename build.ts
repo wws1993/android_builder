@@ -120,7 +120,11 @@ async function runBuild() {
       const runRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs?per_page=1`, { headers: HEADERS });
       const data = await runRes.json();
       if (!runRes.ok) {
-        throw new Error(`GitHub API 错误 ${runRes.status}: ${data.message || JSON.stringify(data)}`);
+        const msg = data.message || JSON.stringify(data);
+        if (runRes.status === 401) {
+          throw new Error(`GitHub API 401: Token 无效或已过期。请到 GitHub → Settings → Developer settings → Personal access tokens 重新生成，确保勾选 repo 和 workflow 权限，并更新 .env 中的 GITHUB_TOKEN`);
+        }
+        throw new Error(`GitHub API 错误 ${runRes.status}: ${msg}`);
       }
       const runs = data.workflow_runs;
       if (Array.isArray(runs) && runs.length > 0) {
