@@ -35,7 +35,15 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'tools platform-tools build-tools;33.0.2 platforms;android-33'
+          packages: 'tools platform-tools build-tools;29.0.3 build-tools;33.0.2 platforms;android-33'
+
+      # runner 默认 ANDROID_HOME 为 /usr/local/lib/android/sdk，sign 插件可能使用该路径
+      - name: Ensure build-tools 29.0.3 in default SDK
+        run: |
+          DEFAULT_SDK="/usr/local/lib/android/sdk"
+          if [[ -d "$DEFAULT_SDK" ]] && [[ ! -d "$DEFAULT_SDK/build-tools/29.0.3" ]]; then
+            yes | sdkmanager --sdk_root="$DEFAULT_SDK" "build-tools;29.0.3" || true
+          fi
 
       - name: Install Cordova
         run: npm install -g cordova
