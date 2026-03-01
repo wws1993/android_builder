@@ -51,7 +51,7 @@ jobs:
         run: |
           if [[ "${{ github.event.head_commit.message }}" == *"[release]"* ]]; then
             echo "模式: Release (生产环境)"
-            cordova build android --release --verbose -- --apk
+            cordova build android --release --verbose -- --packageType=apk
           else
             echo "模式: Debug (测试环境)"
             cordova build android --debug --verbose
