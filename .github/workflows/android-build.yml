@@ -67,14 +67,26 @@ jobs:
 
       - name: Sign APK (Only for Release)
         if: success() && contains(github.event.head_commit.message, '[release]')
-        uses: r0adkll/sign-android-release@v1
         id: sign_app
-        with:
-          releaseDirectory: platforms/android/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEYSTORE_PW: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PW: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          RELEASE_DIR="platforms/android/app/build/outputs/apk/release"
+          APK=$(ls "$RELEASE_DIR"/*.apk 2>/dev/null | head -1)
+          [[ -z "$APK" ]] && { echo "No APK found"; exit 1; }
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          BT="$SDK/build-tools/33.0.2"
+          [[ ! -d "$BT" ]] && BT="$SDK/build-tools/29.0.3"
+          echo "$KEYSTORE_B64" | base64 -d > keystore.jks
+          ALIGNED="${APK%.apk}-aligned.apk"
+          SIGNED="${APK%.apk}-signed.apk"
+          "$BT/zipalign" -f -v 4 "$APK" "$ALIGNED"
+          "$BT/apksigner" sign --ks keystore.jks --ks-key-alias "$KEY_ALIAS" --ks-pass "pass:$KEYSTORE_PW" --key-pass "pass:$KEY_PW" --out "$SIGNED" "$ALIGNED"
+          rm -f keystore.jks "$ALIGNED"
+          echo "signedReleaseFile=$SIGNED" >> $GITHUB_OUTPUT
 
       - name: Upload Artifact (Release)
         if: contains(github.event.head_commit.message, '[release]')
