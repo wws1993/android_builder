@@ -6,14 +6,13 @@ import unzipper from "unzipper";
 import { consola } from "consola";
 import { parseStringPromise, Builder } from "xml2js";
 
-/**
- * ================= 配置初始化 =================
- */
+/** 制品名需为纯 ASCII，否则 GitHub/Azure 下载 URL 会报 InvalidQueryParameterValue */
+const rawArtifactName = process.env.ARTIFACT_NAME || "my-app-apk";
 const CONFIG = {
   token: process.env.GITHUB_TOKEN,
   owner: process.env.GITHUB_OWNER,
   repo: process.env.GITHUB_REPO,
-  artifactName: process.env.ARTIFACT_NAME || "my-app-apk",
+  artifactName: /^[\x00-\x7F]*$/.test(rawArtifactName) ? rawArtifactName : "kaigeer-apk",
   appId: process.env.APP_ID,
   downloadDir: join(homedir(), "Downloads"),
 };

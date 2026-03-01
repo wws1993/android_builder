@@ -80,12 +80,12 @@ jobs:
         if: contains(github.event.head_commit.message, '[release]')
         uses: actions/upload-artifact@v4
         with:
-          name: 凯格尔运动
+          name: kaigeer-apk
           path: ${{ steps.sign_app.outputs.signedReleaseFile }}
 
       - name: Upload Artifact (Debug)
         if: contains(github.event.head_commit.message, '[release]') == false
         uses: actions/upload-artifact@v4
         with:
-          name: 凯格尔运动
+          name: kaigeer-apk
           path: platforms/android/app/build/outputs/apk/debug/*.apk
