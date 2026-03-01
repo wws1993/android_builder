@@ -74,7 +74,15 @@ async function processProject(buildType: string) {
 
   fs.writeFileSync(configPath, new Builder().buildObject(result));
 
-  // 4. HTML 注入 (vConsole & Safe Area)
+  // 4. 同步工作流中的制品名（与 .env ARTIFACT_NAME 一致）
+  const workflowPath = join(process.cwd(), ".github", "workflows", "android-build.yml");
+  if (fs.existsSync(workflowPath)) {
+    let workflowYml = fs.readFileSync(workflowPath, "utf-8");
+    workflowYml = workflowYml.replace(/(          name:\s+)[^\n]+/g, `$1${CONFIG.artifactName}`);
+    fs.writeFileSync(workflowPath, workflowYml);
+  }
+
+  // 5. HTML 注入 (vConsole & Safe Area)
   const indexPath = join(wwwPath, "index.html");
   let html = fs.readFileSync(indexPath, "utf-8");
   html = html.replace(/<!-- INJECT_START -->[\s\S]*?<!-- INJECT_END -->/g, "");
@@ -104,9 +112,30 @@ async function runBuild() {
 
     console.log("");
     let progress = 0, status = "queued";
+    consola.info("等待工作流启动...");
     await new Promise(r => setTimeout(r, 8000));
-    const runRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs?per_page=1`, { headers: HEADERS });
-    const runId = (await runRes.json()).workflow_runs[0].id;
+
+    /** 获取最新 workflow run，带重试（工作流可能尚未创建） */
+    let runId: number | null = null;
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      const runRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs?per_page=1`, { headers: HEADERS });
+      const data = await runRes.json();
+      if (!runRes.ok) {
+        throw new Error(`GitHub API 错误 ${runRes.status}: ${data.message || JSON.stringify(data)}`);
+      }
+      const runs = data.workflow_runs;
+      if (Array.isArray(runs) && runs.length > 0) {
+        runId = runs[0].id;
+        break;
+      }
+      if (attempt < 5) {
+        consola.info(`第 ${attempt} 次获取 run 为空，${attempt * 5}s 后重试...`);
+        await new Promise(r => setTimeout(r, 5000));
+      } else {
+        throw new Error("无法获取 workflow run，请检查 GITHUB_OWNER/GITHUB_REPO 是否正确，或稍后手动在 Actions 页面下载 APK");
+      }
+    }
+    if (runId == null) throw new Error("runId 获取失败");
 
     while (status !== "completed") {
       const check = await (await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs/${runId}`, { headers: HEADERS })).json();
@@ -121,8 +150,13 @@ async function runBuild() {
     process.stdout.write(`\r  ${"█".repeat(30)} 100% | 状态: 已完成! \n\n`);
     consola.success("✅ 构建成功，下载中...");
 
-    const arts = await (await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs/${runId}/artifacts`, { headers: HEADERS })).json();
-    const art = arts.artifacts.find((a: any) => a.name === CONFIG.artifactName);
+    const artsRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/actions/runs/${runId}/artifacts`, { headers: HEADERS });
+    const arts = await artsRes.json();
+    const art = arts.artifacts?.find((a: any) => a.name === CONFIG.artifactName);
+    if (!art) {
+      const names = arts.artifacts?.map((a: any) => a.name).join(", ") || "无";
+      throw new Error(`未找到制品 "${CONFIG.artifactName}"，当前制品: ${names}。请确认 .env 中 ARTIFACT_NAME 与工作流中 name 一致`);
+    }
     const zipPath = join(process.cwd(), "temp.zip");
     await Bun.write(zipPath, await (await fetch(art.archive_download_url, { headers: HEADERS })).arrayBuffer());
     await fs.createReadStream(zipPath).pipe(unzipper.Extract({ path: CONFIG.downloadDir })).promise();
