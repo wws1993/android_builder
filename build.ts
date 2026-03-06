@@ -104,8 +104,13 @@ async function runBuild() {
     const buildType = await consola.prompt("请选择打包类型:", { type: "select", options: ["debug", "release"] });
     await processProject(buildType);
 
-    const commitMsg = await consola.prompt("请输入推送文字（留空则使用默认）:", { type: "text" });
-    const msg = (typeof commitMsg === "string" && commitMsg.trim()) ? commitMsg.trim() : `Build [${buildType}]: ${new Date().toLocaleString()}`;
+    let commitMsg = await consola.prompt("请输入推送文字（留空则使用默认）:", { type: "text" });
+    if (!commitMsg.trim()) {
+      const defaultMsg = `自定义打包`;
+      consola.info(`使用默认推送文字: ${defaultMsg}`);
+      commitMsg = defaultMsg;
+    }
+    const msg = `Build [${buildType}]: ${commitMsg.trim()}`;
     consola.start(`🚀 推送 [${buildType}] 到云端...`);
     await $`git add .`;
     await $`git commit -m ${[msg]} --allow-empty`;
