@@ -2,7 +2,7 @@
 import { resolve } from "path";
 import { existsSync } from "fs";
 
-const PORT = 5188;
+const PORT = 5189;
 const WWW_DIR = resolve(import.meta.dir, "www");
 
 const server = Bun.serve({

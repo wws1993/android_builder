@@ -1,3 +1,253 @@
+/* 拼图游戏样式 */
+* {
+  box-sizing: border-box;
+}
 body {
-  background-color: #f003;
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  color: #eee;
+}
+
+.screen {
+  padding: 16px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.menu h1 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin: 24px 0;
+}
+.coin {
+  text-align: center;
+  font-size: 1.2rem;
+  margin: 8px 0;
+}
+.menu nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 32px;
+}
+.menu nav button {
+  padding: 14px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  background: #0f3460;
+  color: #fff;
+  cursor: pointer;
+}
+.menu nav button:hover {
+  background: #1a4a7a;
+}
+
+.back {
+  background: transparent !important;
+  color: #8ab4f8;
+  padding: 8px 0 !important;
+  cursor: pointer;
+  border: none;
+  font-size: 0.95rem;
+}
+.themes h2,
+.levels h2 {
+  margin: 8px 0 16px;
+  font-size: 1.3rem;
+}
+.theme-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.theme-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+.theme-card.locked {
+  opacity: 0.8;
+}
+.theme-card .name {
+  font-weight: 600;
+}
+.theme-card .cost {
+  font-size: 0.9rem;
+  margin-right: 8px;
+}
+.theme-card button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #0f3460;
+  color: #fff;
+  cursor: pointer;
+}
+.theme-card button:hover {
+  background: #1a4a7a;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+.level-card {
+  position: relative;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+.level-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(1.02);
+}
+.level-card.done {
+  border: 2px solid #4ade80;
+}
+.level-card .thumb {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.level-card .best {
+  font-size: 0.7rem;
+  margin-top: 4px;
+  color: #94a3b8;
+}
+
+/* 拼图界面 */
+.puzzle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.puzzle .timer {
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+.puzzle-area {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  position: relative;
+  margin: 8px 0;
+}
+.piece {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  cursor: grab;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.15s, transform 0.15s;
+  touch-action: none;
+}
+.piece:active {
+  cursor: grabbing;
+}
+.piece.dragging {
+  cursor: grabbing;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+.piece.near-slot {
+  box-shadow: 0 0 0 3px #4ade80;
+}
+.piece.placed {
+  cursor: default;
+}
+.piece-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 12px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+.piece-pool .piece {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  max-width: 56px;
+  max-height: 56px;
+  flex-shrink: 0;
+}
+.puzzle .tools {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.puzzle .tools button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #0f3460;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+.puzzle .tools button:hover {
+  background: #1a4a7a;
+}
+
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.preview-overlay img {
+  max-width: 90vw;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.btn-replace {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  cursor: pointer;
+}
+.custom-badge {
+  font-size: 0.6rem;
+  color: #fbbf24;
+  margin-top: 2px;
+}
+
+.preview-overlay button {
+  margin-top: 16px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #0f3460;
+  color: #fff;
+  cursor: pointer;
 }

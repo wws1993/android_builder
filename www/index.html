@@ -1,26 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>kaigeer</title>
-  <link rel="stylesheet" href="./assets/index.css">
-  <script src="./assets/index.js"></script>
-
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>拼图游戏</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0d12; }
+    #game-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    #game-container canvas { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "pixi.js": "https://cdn.jsdelivr.net/npm/pixi.js@6.5.10/+esm"
+    }
+  }
+  </script>
 <!-- INJECT_START -->
+<style>body{padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}</style>
 <!-- INJECT_END -->
 </head>
 
 <body>
-  <!-- <div id="root"></div> -->
-
-  <div class="container">
-    <div class="header">
-      <h1>凯格尔运动</h1>
-    </div>
-  </div>
+  <div id="game-container"></div>
+  <script type="module" src="./assets/game.js"></script>
 </body>
 
 </html>

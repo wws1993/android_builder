@@ -104,6 +104,22 @@ async function runBuild() {
     const buildType = await consola.prompt("请选择打包类型:", { type: "select", options: ["debug", "release"] });
     await processProject(buildType);
 
+    const pkgPath = join(process.cwd(), "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+    const defaultVersion = pkg.version || "1.0.0";
+
+    const versionInput = await consola.prompt(`请输入版本号（留空使用 ${defaultVersion}）:`, { type: "text" });
+    const newVersion = (versionInput || defaultVersion).trim();
+    if (newVersion) {
+      pkg.version = newVersion;
+      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+      const gameJsPath = join(process.cwd(), "www", "assets", "game.js");
+      let gameJs = fs.readFileSync(gameJsPath, "utf-8");
+      gameJs = gameJs.replace(/const APP_VERSION = "[^"]+";/, `const APP_VERSION = "${newVersion}";`);
+      fs.writeFileSync(gameJsPath, gameJs);
+      consola.info(`版本已更新为: ${newVersion}`);
+    }
+
     let commitMsg = await consola.prompt("请输入推送文字（留空则使用默认）:", { type: "text" });
     if (!commitMsg.trim()) {
       const defaultMsg = `自定义打包`;

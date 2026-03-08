@@ -1,14 +1,16 @@
 {
-  "version": "1.0.290",
+  "version": "1.1.0",
   "dependencies": {
     "@types/xml2js": "^0.4.14",
     "consola": "^3.4.2",
+    "sharp": "^0.34.5",
     "unzipper": "^0.12.3",
     "xml2js": "^0.6.2"
   },
   "scripts": {
     "build": "bun build.ts",
-    "dev": "bun run dev.ts"
+    "dev": "bun run dev.ts",
+    "gen-images": "bun scripts/generate-images.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.3.5",
