@@ -84,15 +84,15 @@ async function processProject(buildType: string) {
   // 5. HTML 注入 (vConsole & Safe Area)
   const indexPath = join(wwwPath, "index.html");
   let html = fs.readFileSync(indexPath, "utf-8");
-  html = html.replace(/<!-- INJECT_START -->[\s\S]*?<!-- INJECT_END -->/g, "");
+  html = html.replace(/  <!-- INJECT_START -->[\s\S]*?<!-- INJECT_END -->/g, "");
 
   const useV = buildType === "debug" && await consola.prompt("是否开启 vConsole?", { type: "confirm" });
   const useS = await consola.prompt("是否保留安全区域?", { type: "confirm" });
 
-  let inj = "<!-- INJECT_START -->\n";
-  if (useV) inj += `<script src="https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js"></script>\n<script>new VConsole();</script>\n`;
-  if (useS) inj += `<style>body{padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}</style>\n`;
-  inj += "<!-- INJECT_END -->";
+  let inj = "  <!-- INJECT_START -->\n";
+  if (useV) inj += `  <script src="https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js"></script>\n<script>new VConsole();</script>\n`;
+  if (useS) inj += `  <style>body{padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}</style>\n`;
+  inj += "  <!-- INJECT_END -->";
   fs.writeFileSync(indexPath, html.replace("</head>", `${inj}\n</head>`));
 }
 
