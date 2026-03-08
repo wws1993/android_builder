@@ -20,7 +20,7 @@ import { sliceImage } from "./puzzle-core.js";
 
 const W = 420;
 const H = 700;
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.1.1";
 let app;
 let stage;
 let state = { themeId: 1, levelIndex: 0 };

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 拼图游戏启动页图标：矢量拼图块，适配 Android 12+ Splash Screen API（288×288dp，192dp 圆形内） -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+  <!-- 拼图块形状：L 形主体 + 凸起，主色 #6366F1 与 game.js 一致 -->
+  <path
+    android:fillColor="#6366F1"
+    android:pathData="M96,72 L192,72 L192,120 L240,120 L240,168 L192,168 L192,216 L96,216 L96,168 L48,168 L48,120 L96,120 Z" />
+</vector>
